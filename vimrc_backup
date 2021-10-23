@@ -1,0 +1,88 @@
+" User configuration file for vim
+set nocompatible	" Use Vim defaults instead of 100% vi compatibility
+set modelines=0		" CVE-2007-2438
+set encoding=utf8	" To encoding and open the file by utf8
+set fileencoding=utf-8
+
+set backspace=2		" more powerful backspacing
+set tabstop=4
+set expandtab       " use FileType to change for certain type
+set shiftwidth=4
+set ai
+set ruler
+set nu
+set mouse=a
+set smartcase
+
+set t_Co=256
+set bg=light
+colo default
+set hlsearch
+syntax on		
+
+
+" Define filetype
+autocmd BufNewFile,BufReadPost *.ino set filetype=arduino
+
+
+" Change tabstop
+autocmd FileType c,cpp :setlocal noexpandtab cindent
+autocmd FileType arduino :setlocal tabstop=2 shiftwidth=2
+
+" Auto complete
+inoremap {<CR> {<CR>}<Esc>ko
+
+" Moving line
+nnoremap <ESC>k :m .-2<CR>
+nnoremap <ESC>j :m .+1<CR>
+vnoremap <ESC>k :m '<-2<CR>gv=gv
+vnoremap <ESC>j :m '>+1<CR>gv=gv
+
+" For macOS, use system's clipboard.
+set clipboard=unnamed
+
+" Plug in by vim-plug
+call plug#begin('~/.vim/autoload')
+Plug 'kshenoy/vim-signature'
+Plug 'kylelaker/riscv.vim'
+Plug 'godlygeek/tabular'
+Plug 'plasticboy/vim-markdown'
+Plug 'Valloric/YouCompleteMe', { 'do': './install.py' }
+call plug#end()
+
+
+" Run a line by python in vim
+python << EOL
+import vim
+def EvaluateCurrentLine(*args):
+    cur_str = vim.current.line
+    action, symb = None, None
+    for i in args:
+        if i in ["r","p"]: action = i
+        else: symb = i
+    try: start = cur_str.rindex(symb)+len(symb)
+    except: start = 0
+    result = eval(cur_str[start:],globals())
+    if action == "r":
+        vim.current.line = cur_str[:start]+str(result)
+    else:
+        print result
+EOL
+command -narg=* PyEv python EvaluateCurrentLine(<f-args>)
+
+" -------------------- Following are from MCC, NTHU. --------------------
+
+" Clear all register by :WipeReg
+command! WipeReg for i in range(34,122) | silent! call setreg(nr2char(i), []) | endfor
+
+" Make persistent undo if posible
+if has('persistent_undo')
+	set undofile
+	set undodir=$HOME/.vim/undodir
+endif
+
+" Don't write backup file if vim is being called by "crontab -e"
+au BufWrite /private/tmp/crontab.* set nowritebackup nobackup
+" Don't write backup file if vim is being called by "chpass"
+au BufWrite /private/etc/pw.* set nowritebackup nobackup
+
