@@ -1,5 +1,6 @@
 #!/bin/zsh
 # Download the best quality of YouTube video by youtube-dl.
+# 2021/11/10: It is suggested to use `yt-dlp` instead.
 set -e
 
 dir="/Users/ian/Documents/youtube-dl"
